@@ -2,6 +2,7 @@
 
 import GlobalLoading from "@/components/GlobalLoading";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { SidebarProvider } from "@/contexts/SidebarContext";
 import { HeroUIProvider, ToastProvider } from "@heroui/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider as NextThemesProvider } from "next-themes";
@@ -15,8 +16,10 @@ function AppProvider({ children }: { children: React.ReactNode }) {
         <ToastProvider />
         <QueryClientProvider client={queryClient}>
           <AuthProvider>
-            <GlobalLoading />
-            {children}
+            <SidebarProvider>
+              <GlobalLoading />
+              {children}
+            </SidebarProvider>
           </AuthProvider>
         </QueryClientProvider>
       </NextThemesProvider>
