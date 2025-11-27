@@ -43,7 +43,6 @@ const AppNavbar = (props: NavbarProps) => {
       }}
       maxWidth="xl"
       isBordered
-      shouldHideOnScroll
       isMenuOpen={isMenuOpen}
       onMenuOpenChange={setIsMenuOpen}
     >

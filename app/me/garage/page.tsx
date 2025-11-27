@@ -84,8 +84,8 @@ function MyGaragePage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-        <div>
-          <h1 className="text-3xl font-light mb-1">My Garage</h1>
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-default-900">My Garage</h1>
           <p className="text-default-600">
             Manage your electric vehicle listings and share offerings.
           </p>

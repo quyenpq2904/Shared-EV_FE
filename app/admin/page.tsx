@@ -82,9 +82,8 @@ const MonthlyTargetCard = () => (
           }}
           value={75.55}
           strokeWidth={3}
-          showValueLabel={false} // Tắt label mặc định để tự custom
+          showValueLabel={false}
         />
-        {/* Custom Center Content */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span className="text-3xl font-bold text-default-900">75.55%</span>
           <Chip

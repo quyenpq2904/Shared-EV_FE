@@ -167,8 +167,10 @@ function OfferingsPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-centergap-4">
-        <div>
-          <h1 className="text-3xl font-light mb-1">My EV Share Offerings</h1>
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold text-default-900">
+            My EV Share Offerings
+          </h1>
           <p className="text-default-600">
             Manage, edit, and track the status of all your vehicle share
             listings.

@@ -87,7 +87,7 @@ function ProfilePage() {
 
   return (
     <div className="">
-      <h1 className="text-3xl font-light mb-2">Public profile</h1>
+      <h1 className="text-3xl font-bold text-default-900">Public profile</h1>
       <Divider className="my-4" />
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">

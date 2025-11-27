@@ -89,13 +89,11 @@ export const mockChats: ChatGroup[] = [
         type: "text",
       },
     ],
-    // 👆👆👆 HẾT PHẦN SỬA 👆👆👆
   },
   {
     id: "2",
     name: "System Notifications",
     type: "system",
-    // System không cần avatar ảnh, dùng icon
     members: [{ id: "sys", name: "System", avatar: "" }],
     unreadCount: 1,
     lastMessage: "Your offering approved.",
@@ -106,7 +104,6 @@ export const mockChats: ChatGroup[] = [
     id: "3",
     name: "Maintenance Crew",
     type: "group",
-    // ✅ Avatar riêng cho nhóm bảo trì (Ví dụ Logo Team)
     groupAvatar:
       "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=1000&auto=format&fit=crop",
     members: [
@@ -175,7 +172,7 @@ function MessagesPage() {
 
   return (
     <div className="">
-      <h1 className="text-3xl font-light mb-2">Messages</h1>
+      <h1 className="text-3xl font-bold text-default-900">Messages</h1>
       <Divider className="my-4" />
       <div className="flex h-[calc(100vh-15rem)] gap-3">
         <div className="w-[350px] flex flex-col gap-4 shrink-0">
