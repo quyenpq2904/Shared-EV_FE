@@ -55,6 +55,12 @@ const sidebarConfig = [
     title: "Activity & Collaboration",
     items: [
       {
+        key: "messages",
+        label: "Messages",
+        href: "/me/messages",
+        icon: "solar:letter-linear",
+      },
+      {
         key: "transactions",
         label: "Transactions",
         href: "/me/transactions",
