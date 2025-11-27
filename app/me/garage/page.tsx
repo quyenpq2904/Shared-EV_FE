@@ -83,7 +83,7 @@ const StatusBadge = ({ status }: { status: IVehicle["status"] }) => {
 function MyGaragePage() {
   return (
     <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div>
           <h1 className="text-3xl font-light mb-1">My Garage</h1>
           <p className="text-default-600">

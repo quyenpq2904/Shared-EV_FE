@@ -54,7 +54,7 @@ function SignInPage() {
         <div className="flex flex-col items-center pb-6">
           <AppIcon size={60} />
           <p className="text-xl font-medium">Welcome Back</p>
-          <p className="text-small text-default-500">
+          <p className="text-small text-default-600">
             Log in to your account to continue
           </p>
         </div>
@@ -100,7 +100,7 @@ function SignInPage() {
             <Checkbox name="remember" size="sm">
               Remember me
             </Checkbox>
-            <Link className="text-default-500" href="#" size="sm">
+            <Link className="text-default-700" href="#" size="sm">
               Forgot password?
             </Link>
           </div>
@@ -110,7 +110,7 @@ function SignInPage() {
         </Form>
         <div className="flex items-center gap-4 py-2">
           <Divider className="flex-1" />
-          <p className="text-tiny text-default-500 shrink-0">OR</p>
+          <p className="text-tiny text-default-600 shrink-0">OR</p>
           <Divider className="flex-1" />
         </div>
         <div className="flex flex-col gap-2">
@@ -122,7 +122,7 @@ function SignInPage() {
           </Button>
           <Button
             startContent={
-              <Icon className="text-default-500" icon="fe:github" width={24} />
+              <Icon className="text-default-600" icon="fe:github" width={24} />
             }
             variant="bordered"
           >

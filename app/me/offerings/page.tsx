@@ -1,21 +1,11 @@
 "use client";
 
+import DataTable, { Column } from "@/components/DataTable";
 import { formatCurrency } from "@/lib/utils/currency";
-import { IOffering, OfferingStatus } from "@/types/Offering";
-import {
-  Button,
-  Chip,
-  Image,
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-  Tooltip,
-} from "@heroui/react";
+import { IOffering } from "@/types/Offering";
+import { Button, Chip, Image, Input, Tab, Tabs, Tooltip } from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export const mockOfferings: IOffering[] = [
   {
@@ -68,17 +58,17 @@ export const mockOfferings: IOffering[] = [
   },
 ];
 
-const columns = [
+const columns: Column[] = [
   { name: "EV MODEL", uid: "model" },
   { name: "SHARES", uid: "shares" },
   { name: "PRICE / SHARE", uid: "price" },
   { name: "TOTAL VALUE", uid: "total" },
-  { name: "STATUS", uid: "status" },
-  { name: "ACTIONS", uid: "actions" },
+  { name: "STATUS", uid: "status", sortable: true },
+  { name: "ACTIONS", uid: "actions", align: "center" },
 ];
 
 const statusColorMap: Record<
-  OfferingStatus,
+  string,
   "success" | "warning" | "primary" | "default"
 > = {
   active: "success",
@@ -88,14 +78,23 @@ const statusColorMap: Record<
 };
 
 function OfferingsPage() {
-  const renderCell = useCallback((item: IOffering, columnKey: React.Key) => {
-    const cellValue = item[columnKey as keyof IOffering];
+  const [filterValue, setFilterValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | number>("all");
+  const [page, setPage] = useState(1);
+
+  // const { data, isLoading } = useQuery({
+  //   queryKey: ["offerings", page],
+  //   queryFn: () => fetchOfferings({ page, limit: 10 }),
+  // });
+
+  const renderCell = useCallback((item: any, columnKey: React.Key) => {
+    const cellValue = item[columnKey as keyof typeof item];
 
     switch (columnKey) {
       case "model":
         return (
           <div className="flex items-center gap-4">
-            <div className="w-16 h-12 relative rounded-lg overflow-hidden bg-default-100 shrink-0">
+            <div className="w-14 h-10 relative rounded-lg overflow-hidden bg-default-100 shrink-0">
               <Image
                 removeWrapper
                 alt={item.model}
@@ -104,75 +103,59 @@ function OfferingsPage() {
               />
             </div>
             <div className="flex flex-col">
-              <p className="text-sm font-bold text-white">{item.model}</p>
-              <p className="text-xs text-default-400">{item.description}</p>
+              <p className="text-small font-bold text-default-900">
+                {item.model}
+              </p>
+              <p className="text-tiny text-default-600">{item.description}</p>
             </div>
           </div>
         );
       case "shares":
         return (
-          <div className="text-sm text-white font-medium">
+          <div className="text-small text-default-700">
             {item.sharesSold} / {item.totalShares}
           </div>
         );
       case "price":
         return (
-          <div className="text-sm text-white font-medium">
+          <div className="text-small text-default-700 font-medium">
             {formatCurrency(item.pricePerShare)}
           </div>
         );
       case "total":
         return (
-          <div className="text-sm text-white font-bold">
+          <div className="text-small font-bold text-default-900">
             {formatCurrency(item.totalValue)}
           </div>
         );
       case "status":
         return (
           <Chip
-            className="capitalize border-none"
+            className="capitalize border-none gap-1 text-default-600"
             color={statusColorMap[item.status]}
             size="sm"
             variant="flat"
-            classNames={{
-              content: "font-semibold text-xs px-2",
-            }}
           >
             {cellValue}
           </Chip>
         );
       case "actions":
         return (
-          <div className="flex items-center gap-2">
-            <Tooltip content="View Details" className="text-black">
-              <Button
-                isIconOnly
-                size="sm"
-                variant="light"
-                className="text-default-400 hover:text-white"
-              >
-                <Icon icon="solar:eye-linear" className="text-lg" />
-              </Button>
+          <div className="relative flex justify-center items-center gap-2">
+            <Tooltip content="View Details">
+              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                <Icon icon="solar:eye-linear" />
+              </span>
             </Tooltip>
-            <Tooltip content="Edit Listing" className="text-black">
-              <Button
-                isIconOnly
-                size="sm"
-                variant="light"
-                className="text-default-400 hover:text-white"
-              >
-                <Icon icon="solar:pen-new-square-linear" className="text-lg" />
-              </Button>
+            <Tooltip content="Edit">
+              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
+                <Icon icon="solar:pen-new-square-linear" />
+              </span>
             </Tooltip>
-            <Tooltip content="Delete" color="danger">
-              <Button
-                isIconOnly
-                size="sm"
-                variant="light"
-                className="text-default-400 hover:text-danger"
-              >
-                <Icon icon="solar:trash-bin-trash-linear" className="text-lg" />
-              </Button>
+            <Tooltip color="danger" content="Delete">
+              <span className="text-lg text-danger cursor-pointer active:opacity-50">
+                <Icon icon="solar:trash-bin-trash-linear" />
+              </span>
             </Tooltip>
           </div>
         );
@@ -191,83 +174,62 @@ function OfferingsPage() {
             listings.
           </p>
         </div>
-        <Button
-          className=""
-          startContent={
-            <Icon icon="solar:add-circle-bold" className="text-xl" />
-          }
-          variant="flat"
-          color="success"
-        >
-          Create New Offering
-        </Button>
       </div>
-
-      <Table
-        aria-label="Offerings Table"
-        classNames={{
-          wrapper: "bg-transparent border-none shadow-none p-0",
-          th: "bg-[#122321] text-default-400 font-semibold uppercase text-xs py-4 first:rounded-l-xl last:rounded-r-xl", // Style Header xanh rêu đậm
-          td: "py-4 border-b border-default-100/10 group-last:border-none",
-          table: "border-separate border-spacing-y-2",
-        }}
-      >
-        <TableHeader columns={columns}>
-          {(column) => (
-            <TableColumn
-              key={column.uid}
-              align={
-                column.uid === "actions" || column.uid === "status"
-                  ? "center"
-                  : "start"
-              }
+      <div>
+        <div className="flex flex-col gap-4 mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
+            <Tabs
+              aria-label="Status Filter"
+              selectedKey={statusFilter}
+              onSelectionChange={setStatusFilter}
             >
-              {column.name}
-            </TableColumn>
-          )}
-        </TableHeader>
-        <TableBody items={mockOfferings}>
-          {(item) => (
-            <TableRow
-              key={item.id}
-              className="hover:bg-white/5 transition-colors rounded-xl"
-            >
-              {(columnKey) => (
-                <TableCell>{renderCell(item, columnKey)}</TableCell>
-              )}
-            </TableRow>
-          )}
-        </TableBody>
-      </Table>
+              <Tab key="all" title="All Offerings" />
+              <Tab key="active" title="Active" />
+              <Tab key="pending" title="Pending" />
+              <Tab key="sold" title="Sold Out" />
+              <Tab key="draft" title="Draft" />
+            </Tabs>
 
-      {/* --- FOOTER / PAGINATION --- */}
-      <div className="flex justify-between items-center mt-6 pt-4 border-t border-default-100/10">
-        <span className="text-small text-default-400">
-          Showing 1 to 4 of 4 results
-        </span>
-        <div className="flex gap-2">
-          <Button
-            isIconOnly
-            variant="flat"
-            className="bg-[#122321] text-default-400 h-9 w-9 rounded-lg"
-          >
-            <Icon icon="solar:alt-arrow-left-linear" />
-          </Button>
-          <Button
-            isIconOnly
-            variant="solid"
-            className="bg-[#00E396] text-black font-bold h-9 w-9 rounded-lg"
-          >
-            1
-          </Button>
-          <Button
-            isIconOnly
-            variant="flat"
-            className="bg-[#122321] text-default-400 h-9 w-9 rounded-lg"
-          >
-            <Icon icon="solar:alt-arrow-right-linear" />
-          </Button>
+            <div className="flex gap-4">
+              <Input
+                isClearable
+                className="w-full sm:max-w-[300px]"
+                placeholder="Search offerings..."
+                startContent={
+                  <Icon
+                    icon="solar:magnifer-linear"
+                    className="text-default-400"
+                  />
+                }
+                value={filterValue}
+                onClear={() => setFilterValue("")}
+                onValueChange={setFilterValue}
+                variant="bordered"
+                classNames={{ inputWrapper: "border-default-300" }}
+              />
+              <Button
+                className="min-w-28"
+                startContent={
+                  <Icon icon="solar:add-circle-bold" className="text-xl" />
+                }
+                variant="flat"
+                color="success"
+              >
+                Create
+              </Button>
+            </div>
+          </div>
         </div>
+        <DataTable<IOffering>
+          columns={columns}
+          data={mockOfferings}
+          renderCell={renderCell}
+          page={page}
+          totalPages={1}
+          totalItems={4}
+          onPageChange={(newPage) => setPage(newPage)}
+          // isLoading={isLoading}
+        />
       </div>
     </div>
   );

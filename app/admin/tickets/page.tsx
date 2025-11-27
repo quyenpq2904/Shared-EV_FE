@@ -1,31 +1,22 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import {
-  Table,
-  TableHeader,
-  TableColumn,
-  TableBody,
-  TableRow,
-  TableCell,
-  Input,
   Button,
-  DropdownTrigger,
-  Dropdown,
-  DropdownMenu,
-  DropdownItem,
   Chip,
   User,
-  Pagination,
-  Tab,
+  Input,
   Tabs,
-  Selection,
-  Card,
-  CardBody,
+  Tab,
+  Dropdown,
+  DropdownTrigger,
+  DropdownMenu,
+  DropdownItem,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 import StatsCard from "@/components/StatsCard";
+import DataTable, { Column } from "@/components/DataTable";
 
 const stats = [
   {
@@ -51,13 +42,13 @@ const stats = [
   },
 ];
 
-const columns = [
+const columns: Column[] = [
   { name: "TICKET ID", uid: "id", sortable: true },
   { name: "REQUESTED BY", uid: "requestedBy", sortable: true },
   { name: "SUBJECT", uid: "subject" },
   { name: "CREATE DATE", uid: "date", sortable: true },
   { name: "STATUS", uid: "status", sortable: true },
-  { name: "ACTIONS", uid: "actions" },
+  { name: "ACTIONS", uid: "actions", align: "center" },
 ];
 
 const users = [
@@ -125,25 +116,46 @@ const statusColorMap: Record<string, "success" | "warning" | "default"> = {
   Closed: "default",
 };
 
-function TicketsPage() {
-  const [filterValue, setFilterValue] = React.useState("");
-  const [selectedKeys, setSelectedKeys] = React.useState<Selection>(
-    new Set([])
-  );
-  const [statusFilter, setStatusFilter] = React.useState<string | number>(
-    "all"
-  );
-  const [page, setPage] = React.useState(1);
+export default function TicketsPage() {
   const router = useRouter();
+  const [filterValue, setFilterValue] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | number>("all");
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
 
+  const filteredItems = useMemo(() => {
+    let filtered = [...users];
+    if (filterValue) {
+      filtered = filtered.filter((item) =>
+        Object.values(item).some((val) =>
+          String(val).toLowerCase().includes(filterValue.toLowerCase())
+        )
+      );
+    }
+
+    if (statusFilter !== "all") {
+      filtered = filtered.filter((item) => item.status === statusFilter);
+    }
+
+    return filtered;
+  }, [filterValue, statusFilter]);
+
+  const paginatedItems = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return filteredItems.slice(start, end);
+  }, [page, filteredItems]);
+
+  const totalPages = Math.ceil(filteredItems.length / rowsPerPage);
   const renderCell = useCallback(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (user: any, columnKey: React.Key) => {
       const cellValue = user[columnKey as keyof typeof user];
 
       switch (columnKey) {
         case "id":
-          return <span className="text-small">{cellValue}</span>;
+          return (
+            <span className="text-small text-default-600">{cellValue}</span>
+          );
 
         case "requestedBy":
           return (
@@ -152,7 +164,8 @@ function TicketsPage() {
               description={user.email}
               name={cellValue}
               classNames={{
-                name: "font-semibold ",
+                name: "font-semibold text-default-900",
+                description: "text-default-600",
               }}
             >
               {user.email}
@@ -161,16 +174,20 @@ function TicketsPage() {
 
         case "subject":
           return (
-            <p className="text-small truncate max-w-[300px]">{cellValue}</p>
+            <p className="text-small font-medium text-default-700 truncate max-w-[300px]">
+              {cellValue}
+            </p>
           );
 
         case "date":
-          return <span className="text-small">{cellValue}</span>;
+          return (
+            <span className="text-small text-default-600">{cellValue}</span>
+          );
 
         case "status":
           return (
             <Chip
-              className="capitalize border-none gap-1"
+              className="capitalize border-none gap-1 font-medium"
               color={statusColorMap[user.status]}
               size="sm"
               variant="flat"
@@ -181,17 +198,22 @@ function TicketsPage() {
 
         case "actions":
           return (
-            <div className="relative flex justify-end items-center gap-2">
+            <div className="relative flex justify-center items-center gap-2">
               <Dropdown>
                 <DropdownTrigger>
                   <Button isIconOnly size="sm" variant="light">
-                    <Icon icon="solar:menu-dots-bold" className="text-xl" />
+                    <Icon
+                      icon="solar:menu-dots-bold"
+                      className="text-xl text-default-400"
+                    />
                   </Button>
                 </DropdownTrigger>
                 <DropdownMenu>
                   <DropdownItem
                     key="details"
-                    onPress={() => router.push("/admin/tickets/123123")}
+                    onPress={() =>
+                      router.push(`/admin/tickets/${user.id.replace("#", "")}`)
+                    }
                   >
                     View Details
                   </DropdownItem>
@@ -214,8 +236,21 @@ function TicketsPage() {
     [router]
   );
 
-  const topContent = useMemo(() => {
-    return (
+  return (
+    <div className="space-y-8">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {stats.map((item, index) => (
+          <StatsCard
+            key={index}
+            title={item.title}
+            value={item.value}
+            icon={item.icon}
+            iconColor={item.color}
+            iconBg={item.bg}
+          />
+        ))}
+      </div>
+
       <div className="flex justify-between items-center">
         <div className="flex flex-col gap-4 ">
           {/* Title & Description bên trong Table header để thẳng hàng */}
@@ -262,90 +297,16 @@ function TicketsPage() {
           </div>
         </div>
       </div>
-    );
-  }, [filterValue, statusFilter]);
 
-  const bottomContent = useMemo(() => {
-    return (
-      <div className="py-2 px-2 flex justify-between items-center border-t border-default-100 mt-2">
-        <span className="w-[30%] text-small ">
-          Showing <span className="font-semibold">1</span> to{" "}
-          <span className="font-semibold">10</span> of{" "}
-          <span className="font-semibold">12</span>
-        </span>
-        <Pagination
-          isCompact
-          showControls
-          showShadow
-          color="primary"
-          page={page}
-          total={10}
-          onChange={setPage}
-          classNames={{
-            cursor: "bg-primary text-white font-bold",
-          }}
-        />
-      </div>
-    );
-  }, [page]);
-
-  return (
-    <div className="">
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        {stats.map((item, index) => (
-          <StatsCard
-            key={index}
-            title={item.title}
-            value={item.value}
-            icon={item.icon}
-            iconColor={item.color}
-            iconBg={item.bg}
-          />
-        ))}
-      </div>
-
-      <div className="bg-content1 border border-default-200 rounded-xl p-4 shadow-sm">
-        <Table
-          aria-label="Support Tickets Table"
-          isHeaderSticky
-          bottomContent={bottomContent}
-          bottomContentPlacement="outside"
-          classNames={{
-            wrapper: "max-h-[600px] shadow-none bg-transparent p-0",
-            th: "bg-transparent text-default-900 border-b border-default-200 font-semibold h-10",
-            td: "py-4 border-b border-default-100 group-last:border-none",
-            thead: "[&>tr]:first:shadow-none",
-          }}
-          selectedKeys={selectedKeys}
-          selectionMode="multiple"
-          sortDescriptor={{ column: "date", direction: "descending" }}
-          topContent={topContent}
-          topContentPlacement="outside"
-          onSelectionChange={setSelectedKeys}
-        >
-          <TableHeader columns={columns}>
-            {(column) => (
-              <TableColumn
-                key={column.uid}
-                align={column.uid === "actions" ? "center" : "start"}
-                allowsSorting={column.sortable}
-              >
-                {column.name}
-              </TableColumn>
-            )}
-          </TableHeader>
-          <TableBody emptyContent={"No tickets found"} items={users}>
-            {(item) => (
-              <TableRow key={item.id}>
-                {(columnKey) => (
-                  <TableCell>{renderCell(item, columnKey)}</TableCell>
-                )}
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <DataTable
+        columns={columns}
+        data={paginatedItems}
+        renderCell={renderCell}
+        page={page}
+        totalPages={totalPages}
+        totalItems={filteredItems.length}
+        onPageChange={setPage}
+      />
     </div>
   );
 }
-export default TicketsPage;
