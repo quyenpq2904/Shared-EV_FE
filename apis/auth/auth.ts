@@ -1,4 +1,4 @@
-import http from "../../utils/http";
+import http from "../../lib/utils/http";
 import { ILoginRequest, IRefreshTokenRequest } from "./auth-req.type";
 import { ILoginResponse, IRefreshTokenResponse } from "./auth-res.type";
 

@@ -24,14 +24,26 @@ import React from "react";
 import ThemeChanger from "./ThemeChanger";
 import AppIcon from "./AppIcon";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { usePathname } from "next/navigation";
+import NextLink from "next/link";
 
-const menuItems = ["Features", "Customers", "About Us", "Intergrations"];
+const menuItems = [
+  { name: "Home", href: "/" },
+  { name: "Offerings", href: "/offerings" },
+  { name: "Customers", href: "/customers" },
+  { name: "About Us", href: "/about-us" },
+  { name: "Integrations", href: "/integrations" },
+];
 
 const AppNavbar = (props: NavbarProps) => {
-  const [isActive, setIsActive] = React.useState("Features");
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
-
   const { isAuthenticated, profile, logout } = useAuthContext();
+  const pathname = usePathname();
+
+  const checkIsActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    return pathname.startsWith(href);
+  };
 
   return (
     <Navbar
@@ -47,31 +59,33 @@ const AppNavbar = (props: NavbarProps) => {
       onMenuOpenChange={setIsMenuOpen}
     >
       <NavbarContent justify="start">
-        <NavbarBrand>
-          <div className="bg-background text-foreground rounded-full">
+        <NavbarBrand as={NextLink} href="/" className="text-foreground gap-2">
+          <div className="bg-background rounded-full">
             <AppIcon size={50} />
           </div>
-          <span className="ml-2 font-medium">ACME</span>
+          <span className="font-medium">ACME</span>
         </NavbarBrand>
-        {menuItems.map((item) => (
-          <NavbarItem
-            key={item}
-            isActive={isActive === item}
-            onClick={() => setIsActive(item)}
-          >
-            <Link
-              aria-current={isActive === item ? "page" : undefined}
-              className="text-foreground"
-              href="#"
-              size="md"
-            >
-              {item}
-            </Link>
-          </NavbarItem>
-        ))}
+
+        {menuItems.map((item) => {
+          const isActive = checkIsActive(item.href);
+          return (
+            <NavbarItem key={item.href} isActive={isActive}>
+              <Link
+                as={NextLink}
+                href={item.href}
+                aria-current={isActive ? "page" : undefined}
+                className={`text-foreground hover:text-primary ${
+                  isActive ? "font-bold " : "text-foreground hover:text-primary"
+                }`}
+                size="md"
+              >
+                {item.name}
+              </Link>
+            </NavbarItem>
+          );
+        })}
       </NavbarContent>
 
-      {/* Right Content */}
       <NavbarContent className="hidden md:flex" justify="end">
         <NavbarItem className="ml-2 flex! items-center gap-2">
           <ThemeChanger />
@@ -199,14 +213,27 @@ const AppNavbar = (props: NavbarProps) => {
             </NavbarMenuItem>
           </>
         )}
-        {menuItems.map((item, index) => (
-          <NavbarMenuItem key={`${item}-${index}`}>
-            <Link className="text-default-500 mb-2 w-full" href="#" size="md">
-              {item}
-            </Link>
-            {index < menuItems.length - 1 && <Divider className="opacity-50" />}
-          </NavbarMenuItem>
-        ))}
+
+        {menuItems.map((item, index) => {
+          const isActive = checkIsActive(item.href);
+          return (
+            <NavbarMenuItem key={`${item.href}-${index}`} isActive={isActive}>
+              <Link
+                as={NextLink}
+                className={`w-full mb-2 ${
+                  isActive ? "font-bold text-primary" : "text-default-500"
+                }`}
+                href={item.href}
+                size="md"
+              >
+                {item.name}
+              </Link>
+              {index < menuItems.length - 1 && (
+                <Divider className="opacity-50" />
+              )}
+            </NavbarMenuItem>
+          );
+        })}
       </NavbarMenu>
     </Navbar>
   );

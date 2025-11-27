@@ -1,4 +1,4 @@
-import http from "../../utils/http";
+import http from "../../lib/utils/http";
 import { IGetMe } from "./users-res.type";
 
 const BaseURL = "users";

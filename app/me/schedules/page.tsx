@@ -56,7 +56,7 @@ export const mockEvents: CalendarEvent[] = [
   {
     id: "1",
     title: "Alex Miller",
-    date: new Date(2024, 9, 5), // Tháng 9 là tháng 10 (index 0)
+    date: new Date(2024, 9, 5),
     startTime: "9am",
     endTime: "11am",
     ownerId: "me",
@@ -89,15 +89,13 @@ export const mockEvents: CalendarEvent[] = [
 ];
 
 function SchedulesPage() {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 9, 1)); // Oct 2024
+  const [currentDate, setCurrentDate] = useState(new Date(2024, 9, 1));
 
-  // --- LOGIC CALENDAR ---
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
   const endDate = endOfWeek(monthEnd);
 
-  // Tạo mảng tất cả các ngày cần hiển thị trong lưới (bao gồm cả ngày đệm của tháng trước/sau)
   const calendarDays = eachDayOfInterval({
     start: startDate,
     end: endDate,

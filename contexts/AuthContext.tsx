@@ -6,7 +6,7 @@ import {
   getTokenFromLS,
   removeTokenFromLS,
   setTokenToLS,
-} from "@/utils/localStorage";
+} from "@/lib/utils/localStorage";
 import { addToast } from "@heroui/react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";

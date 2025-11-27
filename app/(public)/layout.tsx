@@ -8,7 +8,7 @@ export default function AuthLayout({
   return (
     <>
       <AppNavbar />
-      <main>{children}</main>
+      <main className="max-w-7xl mx-auto mt-5">{children}</main>
     </>
   );
 }
