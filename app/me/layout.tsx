@@ -27,7 +27,9 @@ function Layout({ children }: { children: React.ReactNode }) {
             <AppSidebar />
           </div>
         </aside>
-        <main className="flex-1 px-4 pb-10">{children}</main>
+        <main className="flex-1 pb-10 w-full max-w-5xl mx-auto px-4 md:px-6">
+          {children}
+        </main>
       </div>
     </div>
   );

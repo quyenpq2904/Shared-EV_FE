@@ -63,7 +63,6 @@ function TicketDetail() {
 
   return (
     <div>
-      {/* TOP NAV */}
       <div className="flex justify-between items-center">
         <Button
           variant="light"

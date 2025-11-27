@@ -44,9 +44,9 @@ const sidebarConfig = [
         icon: "game-icons:city-car",
       },
       {
-        key: "listings",
-        label: "My Listings",
-        href: "/me/listings",
+        key: "offerings",
+        label: "My Offerings",
+        href: "/me/offerings",
         icon: "solar:tag-price-linear",
       },
     ],

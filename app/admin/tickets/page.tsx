@@ -25,6 +25,7 @@ import {
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
+import StatsCard from "@/components/StatsCard";
 
 const stats = [
   {
@@ -292,23 +293,14 @@ function TicketsPage() {
     <div className="">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         {stats.map((item, index) => (
-          <Card key={index} shadow="sm" className="border border-default-200">
-            <CardBody className="flex flex-row items-center gap-4 p-4">
-              <div
-                className={`flex items-center justify-center w-12 h-12 rounded-xl ${item.bg}`}
-              >
-                <Icon icon={item.icon} className={`text-2xl ${item.color}`} />
-              </div>
-              <div>
-                <p className="text-2xl font-bold text-default-900">
-                  {item.value}
-                </p>
-                <p className="text-sm text-default-600 font-medium">
-                  {item.title}
-                </p>
-              </div>
-            </CardBody>
-          </Card>
+          <StatsCard
+            key={index}
+            title={item.title}
+            value={item.value}
+            icon={item.icon}
+            iconColor={item.color}
+            iconBg={item.bg}
+          />
         ))}
       </div>
 

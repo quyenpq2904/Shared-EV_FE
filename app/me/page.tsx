@@ -86,7 +86,7 @@ function ProfilePage() {
   if (!profile) return null;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 md:px-6">
+    <div className="">
       <h1 className="text-3xl font-light mb-2">Public profile</h1>
       <Divider className="my-4" />
 
