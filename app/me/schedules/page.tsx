@@ -7,6 +7,14 @@ import {
   CardHeader,
   Select,
   SelectItem,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+  useDisclosure,
+  Input,
+  Divider,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
 import {
@@ -21,7 +29,14 @@ import {
   startOfWeek,
   subMonths,
 } from "date-fns";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+
+// ✅ IMPORT COMPONENT MỚI
+import VerticalStepper from "@/components/VerticalStepper";
+
+// ============================================================================
+// 1. TYPE DEFINITIONS
+// ============================================================================
 
 export interface CoOwner {
   id: string;
@@ -40,6 +55,10 @@ export interface CalendarEvent {
   isConflict?: boolean;
 }
 
+// ============================================================================
+// 2. MOCK DATA & HELPERS
+// ============================================================================
+
 export const coOwners: CoOwner[] = [
   { id: "me", name: "Alex Miller (You)", color: "default", hex: "#3f3f46" },
   { id: "jane", name: "Jane Doe", color: "success", hex: "#17c964" },
@@ -52,68 +71,141 @@ export const cars = [
   { key: "ford", label: "Ford Mustang Mach-E" },
 ];
 
-export const mockEvents: CalendarEvent[] = [
+// Helper: Tạo sự kiện động theo tháng hiện tại để luôn có data hiển thị
+const createDynamicEvents = (): CalendarEvent[] => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+
+  return [
+    {
+      id: "1",
+      title: "Alex Miller",
+      date: new Date(year, month, 5),
+      startTime: "9am",
+      endTime: "11am",
+      ownerId: "me",
+    },
+    {
+      id: "2",
+      title: "Jane Doe",
+      date: new Date(year, month, 8),
+      startTime: "1pm",
+      endTime: "4pm",
+      ownerId: "jane",
+    },
+    {
+      id: "3",
+      title: "Sam Wilson",
+      date: new Date(year, month, 11),
+      startTime: "8am",
+      endTime: "12pm",
+      ownerId: "sam",
+    },
+    {
+      id: "4",
+      title: "Booking Conflict",
+      date: new Date(year, month, 11),
+      startTime: "12pm",
+      endTime: "2pm",
+      ownerId: "emily",
+      isConflict: true,
+    },
+  ];
+};
+
+// Dữ liệu cho Vertical Stepper trong Modal
+const bookingSteps = [
   {
-    id: "1",
-    title: "Alex Miller",
-    date: new Date(2024, 9, 5),
-    startTime: "9am",
-    endTime: "11am",
-    ownerId: "me",
+    title: "Request Submitted",
+    description: "June 1st, 10:00 AM",
   },
   {
-    id: "2",
-    title: "Jane Doe",
-    date: new Date(2024, 9, 8),
-    startTime: "1pm",
-    endTime: "4pm",
-    ownerId: "jane",
+    title: "Group Voting",
+    description: "Waiting for other co-owners...",
   },
   {
-    id: "3",
-    title: "Sam Wilson",
-    date: new Date(2024, 9, 11),
-    startTime: "8am",
-    endTime: "12pm",
-    ownerId: "sam",
-  },
-  {
-    id: "4",
-    title: "Booking Conflict",
-    date: new Date(2024, 9, 11),
-    startTime: "12pm",
-    endTime: "2pm",
-    ownerId: "emily",
-    isConflict: true,
+    title: "Booking Confirmed",
+    description: "Pending final approval",
   },
 ];
 
-function SchedulesPage() {
-  const [currentDate, setCurrentDate] = useState(new Date(2024, 9, 1));
+// ============================================================================
+// 3. COMPONENT ĐẾM NGƯỢC (Local)
+// ============================================================================
 
+const CountdownTimer = () => {
+  return (
+    <div className="flex gap-4 justify-center my-6">
+      {[
+        { val: 23, label: "Hours" },
+        { val: 59, label: "Minutes" },
+        { val: 55, label: "Seconds" },
+      ].map((item, idx) => (
+        <div key={idx} className="flex flex-col items-center gap-2">
+          <div className="bg-[#1A2629] w-20 h-16 rounded-lg flex items-center justify-center border border-default-100/10 shadow-inner">
+            <span className="text-2xl font-bold text-white">{item.val}</span>
+          </div>
+          <span className="text-xs text-default-400 uppercase tracking-wide font-medium">
+            {item.label}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+// ============================================================================
+// 4. MAIN COMPONENT
+// ============================================================================
+
+function SchedulesPage() {
+  // State Calendar
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const today = new Date();
+  const events = useMemo(() => createDynamicEvents(), []);
+
+  // State Booking
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  // Logic Calendar Grid
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(monthStart);
   const startDate = startOfWeek(monthStart);
   const endDate = endOfWeek(monthEnd);
 
-  const calendarDays = eachDayOfInterval({
-    start: startDate,
-    end: endDate,
-  });
-
+  const calendarDays = eachDayOfInterval({ start: startDate, end: endDate });
   const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  // Chuyển tháng
   const nextMonth = () => setCurrentDate(addMonths(currentDate, 1));
   const prevMonth = () => setCurrentDate(subMonths(currentDate, 1));
 
-  // Helper tìm event trong ngày
   const getEventsForDay = (day: Date) => {
-    return mockEvents.filter((event) => isSameDay(event.date, day));
+    return events.filter((event) => isSameDay(event.date, day));
+  };
+
+  const handleDayClick = (day: Date) => {
+    setSelectedDate(day);
+  };
+
+  const handleOpenBooking = () => {
+    if (!selectedDate) setSelectedDate(today);
+    setIsSuccess(false);
+    onOpen();
+  };
+
+  const handleConfirmBooking = () => {
+    // Giả lập delay API
+    setTimeout(() => {
+      setIsSuccess(true);
+    }, 500);
   };
 
   return (
     <div className="space-y-6">
+      {/* --- PAGE HEADER --- */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-default-900">EV Schedule</h1>
@@ -132,13 +224,18 @@ function SchedulesPage() {
               <SelectItem key={car.key}>{car.label}</SelectItem>
             ))}
           </Select>
-          <Button variant="shadow" className="font-bold">
+          <Button
+            variant="shadow"
+            className="font-bold"
+            onPress={handleOpenBooking}
+          >
             Book
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* --- LEFT COLUMN: CALENDAR --- */}
         <div className="lg:col-span-8">
           <Card className="border border-default-200 shadow-sm h-full">
             <CardBody className="p-6">
@@ -149,7 +246,7 @@ function SchedulesPage() {
                     className="text-xl"
                   />
                 </Button>
-                <h2 className="text-xl font-bold text-default-900">
+                <h2 className="text-xl font-bold text-default-900 capitalize">
                   {format(currentDate, "MMMM yyyy")}
                 </h2>
                 <Button isIconOnly variant="light" onPress={nextMonth}>
@@ -159,6 +256,8 @@ function SchedulesPage() {
                   />
                 </Button>
               </div>
+
+              {/* Days Header */}
               <div className="grid grid-cols-7 mb-2">
                 {weekDays.map((day) => (
                   <div
@@ -170,27 +269,40 @@ function SchedulesPage() {
                 ))}
               </div>
 
+              {/* Days Grid */}
               <div className="grid grid-cols-7 border-t border-l border-default-200 gap-[1px] bg-default-200">
-                {calendarDays.map((day, idx) => {
+                {calendarDays.map((day) => {
                   const dayEvents = getEventsForDay(day);
                   const isCurrentMonth = isSameMonth(day, monthStart);
                   const hasConflict = dayEvents.some((e) => e.isConflict);
+                  const isSelected =
+                    selectedDate && isSameDay(day, selectedDate);
+                  const isToday = isSameDay(day, today);
+
+                  // Style Logic
+                  let bgClass = "bg-background";
+                  if (!isCurrentMonth) bgClass = "bg-default-50/50";
+                  if (isToday) bgClass = "bg-blue-50/80 dark:bg-blue-900/20";
+                  if (hasConflict) bgClass = "bg-danger-50/50";
+                  const borderClass = isSelected
+                    ? "ring-2 ring-inset ring-primary z-10"
+                    : "";
 
                   return (
                     <div
                       key={day.toString()}
-                      className={`min-h-[100px] p-2 relative flex flex-col bg-background gap-1 transition-colors
-                        ${
-                          !isCurrentMonth
-                            ? "text-default-500"
-                            : "text-default-700"
-                        }
-                        ${hasConflict ? "bg-danger-50/30" : ""}
-                      `}
+                      onClick={() => handleDayClick(day)}
+                      className={`min-h-[100px] p-2 relative flex flex-col gap-1 transition-all cursor-pointer hover:bg-default-100 ${bgClass} ${borderClass} ${
+                        !isCurrentMonth
+                          ? "text-default-400"
+                          : "text-default-700"
+                      }`}
                     >
                       <span
-                        className={`text-sm font-medium ${
-                          !isCurrentMonth ? "opacity-50" : ""
+                        className={`w-7 h-7 flex items-center justify-center rounded-full text-sm ${
+                          isToday
+                            ? "bg-primary text-white font-bold shadow-sm"
+                            : "font-medium"
                         }`}
                       >
                         {format(day, "d")}
@@ -200,19 +312,18 @@ function SchedulesPage() {
                           const owner = coOwners.find(
                             (c) => c.id === event.ownerId
                           );
-
-                          let bgClass = "bg-default-100 text-default-700";
+                          let eventBg = "bg-default-100 text-default-700";
                           if (owner?.color === "success")
-                            bgClass = "bg-[#17c964] text-white";
+                            eventBg = "bg-[#17c964] text-white";
                           if (owner?.color === "warning")
-                            bgClass = "bg-[#f5a524] text-white";
+                            eventBg = "bg-[#f5a524] text-white";
                           if (owner?.color === "secondary")
-                            bgClass = "bg-[#9353d3] text-white";
+                            eventBg = "bg-[#9353d3] text-white";
 
                           return (
                             <div
                               key={event.id}
-                              className={`text-[10px] p-1.5 rounded-md leading-tight ${bgClass} shadow-sm`}
+                              className={`text-[10px] p-1.5 rounded-md leading-tight ${eventBg} shadow-sm`}
                             >
                               <p className="font-bold truncate">
                                 {event.title}
@@ -232,7 +343,9 @@ function SchedulesPage() {
           </Card>
         </div>
 
+        {/* --- RIGHT COLUMN: SIDEBAR --- */}
         <div className="lg:col-span-4 flex flex-col gap-6">
+          {/* Legend */}
           <Card className="border border-default-200 shadow-sm">
             <CardHeader className="px-6 pt-6 pb-0">
               <h3 className="font-bold text-lg text-default-900">
@@ -254,6 +367,7 @@ function SchedulesPage() {
             </CardBody>
           </Card>
 
+          {/* Bookings */}
           <Card className="border border-default-200 shadow-sm">
             <CardHeader className="px-6 pt-6 pb-0">
               <h3 className="font-bold text-lg text-default-900">
@@ -271,20 +385,21 @@ function SchedulesPage() {
               </div>
               <div className="border border-default-200 rounded-xl p-4">
                 <p className="font-bold text-default-900 text-sm">
-                  Oct 17, 9:00 AM - 11:00 AM
-                </p>
-                <p className="text-xs text-default-500 mt-1">
-                  Doctor&apos;s Appointment
-                </p>
-              </div>
-              <div className="border border-default-200 rounded-xl p-4">
-                <p className="font-bold text-default-900 text-sm">
-                  Oct 25, 6:00 PM - 9:00 PM
+                  {format(
+                    new Date(
+                      new Date().getFullYear(),
+                      new Date().getMonth(),
+                      17
+                    ),
+                    "MMM d"
+                  )}
+                  , 9:00 AM - 11:00 AM
                 </p>
               </div>
             </CardBody>
           </Card>
 
+          {/* Alert */}
           <Card className="border border-danger-200 bg-danger-50 shadow-sm">
             <CardBody className="p-4 flex flex-row gap-4 items-start">
               <div className="mt-1">
@@ -298,14 +413,113 @@ function SchedulesPage() {
                   Booking Conflict
                 </h4>
                 <p className="text-danger-600 text-sm mt-1 leading-relaxed">
-                  A scheduling conflict was detected on Oct 11. Please review
-                  and resolve.
+                  A scheduling conflict was detected on{" "}
+                  {format(
+                    new Date(
+                      new Date().getFullYear(),
+                      new Date().getMonth(),
+                      11
+                    ),
+                    "MMM d"
+                  )}
+                  . Please review.
                 </p>
               </div>
             </CardBody>
           </Card>
         </div>
       </div>
+
+      <Modal
+        isOpen={isOpen}
+        onOpenChange={onOpenChange}
+        placement="center"
+        hideCloseButton={isSuccess}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              {!isSuccess && (
+                <ModalHeader className="flex flex-col gap-1">
+                  Book a Time Slot
+                </ModalHeader>
+              )}
+
+              <ModalBody className={isSuccess ? "p-0" : ""}>
+                {isSuccess ? (
+                  <div className="flex flex-col items-center text-center pt-10 pb-6 px-6 w-full">
+                    <Icon
+                      icon="solar:hourglass-line-bold"
+                      className="text-warning text-5xl mb-4"
+                    />
+
+                    <h2 className="text-2xl font-bold">Pending Approval</h2>
+                    <p className="text-default-500 text-sm mt-1">
+                      Auto-approval in...
+                    </p>
+
+                    <CountdownTimer />
+
+                    <Divider className="w-full my-4" />
+
+                    <div className="w-full text-left px-4 pl-2">
+                      <VerticalStepper steps={bookingSteps} currentStep={1} />
+                    </div>
+
+                    <Button
+                      variant="bordered"
+                      color="danger"
+                      className="mt-6 font-medium"
+                      fullWidth
+                      startContent={<Icon icon="solar:close-circle-linear" />}
+                      onPress={onClose}
+                    >
+                      Cancel Request
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-small text-default-600">
+                      Select time for{" "}
+                      <span className="font-bold">
+                        {selectedDate ? format(selectedDate, "PPPP") : ""}
+                      </span>
+                    </p>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        type="time"
+                        label="Start Time"
+                        defaultValue="09:00"
+                      />
+                      <Input
+                        type="time"
+                        label="End Time"
+                        defaultValue="11:00"
+                      />
+                    </div>
+                    <Input label="Purpose" placeholder="e.g., Grocery run" />
+                  </div>
+                )}
+              </ModalBody>
+
+              {!isSuccess && (
+                <ModalFooter>
+                  <Button color="danger" variant="light" onPress={onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    color="primary"
+                    className="font-bold"
+                    onPress={handleConfirmBooking}
+                  >
+                    Confirm Booking
+                  </Button>
+                </ModalFooter>
+              )}
+            </>
+          )}
+        </ModalContent>
+      </Modal>
     </div>
   );
 }

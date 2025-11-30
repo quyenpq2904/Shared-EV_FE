@@ -49,8 +49,6 @@ export interface RowStepsProps extends React.HTMLAttributes<HTMLButtonElement> {
   className?: string;
   stepClassName?: string;
   onStepChange?: (stepIndex: number) => void;
-
-  // ✅ THÊM PROP MỚI
   isClickable?: boolean;
 }
 
@@ -91,8 +89,6 @@ const RowSteps = React.forwardRef<HTMLButtonElement, RowStepsProps>(
       hideProgressBars = false,
       stepClassName,
       className,
-
-      // ✅ Default value = false
       isClickable = false,
 
       ...props
@@ -179,21 +175,21 @@ const RowSteps = React.forwardRef<HTMLButtonElement, RowStepsProps>(
             return (
               <li
                 key={stepIdx}
-                className="relative flex w-full items-center pr-12"
+                className={cn(
+                  "relative flex w-full items-center",
+                  stepIdx < steps.length - 1 ? "pr-12" : "pr-0"
+                )}
               >
                 <button
                   key={stepIdx}
                   ref={ref}
                   aria-current={status === "active" ? "step" : undefined}
-                  // ✅ Vô hiệu hóa nút nếu !isClickable
                   disabled={!isClickable}
                   className={cn(
                     "group rounded-large flex w-full flex-row items-center justify-center gap-x-3 py-2.5",
-                    // ✅ Thêm logic CSS cho cursor
                     isClickable ? "cursor-pointer" : "cursor-default",
                     stepClassName
                   )}
-                  // ✅ Chỉ gọi hàm khi isClickable = true (Thực ra disabled={!isClickable} đã chặn rồi, nhưng thêm logic này cho chắc chắn nếu bỏ disabled)
                   onClick={() => isClickable && setCurrentStep(stepIdx)}
                   {...props}
                 >

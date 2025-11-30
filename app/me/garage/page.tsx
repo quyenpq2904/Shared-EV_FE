@@ -12,6 +12,7 @@ import {
   Input,
 } from "@heroui/react";
 import { Icon } from "@iconify/react";
+import Link from "next/link";
 
 export const garageVehicles: IVehicle[] = [
   {
@@ -98,6 +99,8 @@ function MyGaragePage() {
             variant="bordered"
           />
           <Button
+            as={Link}
+            href="/me/garage/add-vehicle"
             color="success"
             variant="flat"
             startContent={<Icon icon="solar:add-circle-bold" width={28} />}
@@ -189,7 +192,12 @@ function MyGaragePage() {
               </Button>
 
               {vehicle.status === "available" ? (
-                <Button className="flex-1 font-semibold" color="success">
+                <Button
+                  className="flex-1 font-semibold"
+                  as={Link}
+                  href="/me/offerings/create-offering"
+                  color="success"
+                >
                   Create Offering
                 </Button>
               ) : (
