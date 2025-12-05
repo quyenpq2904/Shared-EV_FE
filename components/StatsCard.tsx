@@ -31,7 +31,7 @@ const StatsCard = ({
               <Icon icon={icon} className="text-2xl" />
             </div>
             <div>
-              <p className="text-sm text-default-500 font-medium mb-1">
+              <p className="text-sm text-default-600 font-medium mb-1">
                 {title}
               </p>
               <h3 className="text-2xl font-bold text-default-900">{value}</h3>
