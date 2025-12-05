@@ -15,44 +15,49 @@ import {
 import { Icon } from "@iconify/react";
 import { useRouter } from "next/navigation";
 
+// --- MOCK DATA: Context Shared-EV (Financial Dispute) ---
 const ticketData = {
-  id: "#346520",
-  title: "Sidebar not responsive on mobile",
-  date: "Mon, 3:20 PM (2 days ago)",
+  id: "#EV-BILL-9901",
+  title: "Dispute: Unauthorized Cleaning Fee Charge",
+  date: "Tue, 09:15 AM (4 hours ago)",
   status: "In Progress",
-  pagination: { current: 4, total: 120 },
+  pagination: { current: 5, total: 20 },
   customer: {
-    name: "John Doe",
-    email: "jhondelin@gmail.com",
-    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+    name: "Sarah Conner",
+    email: "sarah.c@example.com",
+    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026702d",
   },
   details: {
-    customer: "John Doe",
-    email: "jhondelin@gmail.com",
-    category: "General Support",
-    created: "Dec 20, 2028",
+    customer: "Sarah Conner",
+    email: "sarah.c@example.com",
+    category: "Billing & Refund", // Danh mục liên quan đến tiền
+    vehicle: "VinFast VF8 Eco",
+    bookingId: "#BK-2025-8821", // ✅ Đã đổi từ Trip ID sang Booking ID
+    created: "Oct 25, 2025",
   },
   messages: [
     {
       id: 1,
-      author: "John Doe",
-      email: "jhondelin@gmail.com",
-      avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d",
+      author: "Sarah Conner",
+      email: "sarah.c@example.com",
+      avatar: "https://i.pravatar.cc/150?u=a042581f4e29026702d",
       role: "Customer",
-      time: "Mon, 3:20 PM (2 hrs ago)",
-      content: `Hi TailAdmin Team,
-I hope you're doing well.
-I'm currently working on customizing the TailAdmin dashboard and would like to add a new section labeled "Reports." Before I proceed, I wanted to check if there's any official guide or best practice you recommend for adding custom pages within the TailAdmin structure.`,
+      time: "Tue, 09:15 AM (4 hours ago)",
+      content: `Hello Support,
+I just checked my bank statement and noticed an extra charge of $50 for "Cleaning Fee" on my recent booking (#BK-2025-8821).
+I returned the car in perfect condition, exactly how I received it. I even vacuumed the mats before handing it over. This charge is incorrect. Please refund this amount immediately or provide proof of why I was charged.`,
     },
     {
       id: 2,
-      author: "Musharof Chowdhury",
-      email: "From - tailadmin support team",
+      author: "SharedEV Admin",
+      email: "From - Billing Support",
       avatar: "https://i.pravatar.cc/150?u=a04258114e29026302d",
       role: "Support",
-      time: "Mon, 3:20 PM (2 hrs ago)",
-      content: `Hi John D,
-Thanks for reaching out—and great to hear you're customizing TailAdmin to fit your needs! Yes, you can definitely add custom pages like a "Reports" section, and it's quite straightforward. Here's a quick guide to help you get started:`,
+      time: "Tue, 10:30 AM (2 hours ago)",
+      content: `Hi Sarah,
+Thank you for contacting us regarding this charge. I understand your concern.
+The $50 fee was initiated by the car owner, claiming there were coffee stains on the rear seat. However, per our "Fair Billing Policy", owners must provide photo evidence within 1 hour of the return.
+I have put this transaction on hold. I am currently reviewing the "Post-trip Evidence" photos uploaded by both you and the owner. If the evidence is insufficient, we will process a full refund to your wallet within 24 hours.`,
     },
   ],
 };
@@ -63,6 +68,7 @@ function TicketDetail() {
 
   return (
     <div>
+      {/* Header Navigation */}
       <div className="flex justify-between items-center">
         <Button
           variant="light"
@@ -71,14 +77,16 @@ function TicketDetail() {
           onPress={() => router.back()}
           className="font-medium text-default-700"
         >
-          Back to Ticket List
+          Back to Support Center
         </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* --- LEFT COLUMN: CONVERSATION --- */}
         <div className="lg:col-span-3">
           <Card className="border border-default-200 shadow-sm">
             <CardBody className="p-0">
+              {/* Ticket Header */}
               <div className="p-6 flex flex-row justify-between items-start">
                 <div>
                   <div className="flex items-center gap-2">
@@ -90,6 +98,8 @@ function TicketDetail() {
                     {ticketData.date}
                   </p>
                 </div>
+
+                {/* Pagination Controls */}
                 <div className="flex items-center gap-3">
                   <span className="text-small text-default-600">
                     {ticketData.pagination.current} of{" "}
@@ -108,6 +118,7 @@ function TicketDetail() {
 
               <Divider />
 
+              {/* Messages List */}
               <div className="p-6 flex flex-col gap-8">
                 {ticketData.messages.map((msg, index) => (
                   <div key={msg.id}>
@@ -139,6 +150,7 @@ function TicketDetail() {
 
               <Divider />
 
+              {/* Reply Section */}
               <div className="p-6 bg-default-50/50">
                 <Textarea
                   placeholder="Type your reply here..."
@@ -151,14 +163,28 @@ function TicketDetail() {
                 />
 
                 <div className="flex justify-between items-center mt-4">
-                  <Button
-                    variant="light"
-                    startContent={
-                      <Icon icon="solar:paperclip-linear" className="text-xl" />
-                    }
-                  >
-                    Attach
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="light"
+                      startContent={
+                        <Icon
+                          icon="solar:paperclip-linear"
+                          className="text-xl"
+                        />
+                      }
+                    >
+                      Attach File
+                    </Button>
+                    <Button
+                      variant="light"
+                      startContent={
+                        <Icon icon="solar:wallet-linear" className="text-xl" />
+                      }
+                      className="text-success-600"
+                    >
+                      Issue Refund
+                    </Button>
+                  </div>
                   <Button color="primary" className="font-medium px-8">
                     Reply
                   </Button>
@@ -168,7 +194,7 @@ function TicketDetail() {
 
                 <div className="flex items-center gap-4">
                   <span className="font-semibold text-default-700 text-small">
-                    Status:
+                    Update Status:
                   </span>
                   <RadioGroup
                     orientation="horizontal"
@@ -180,10 +206,10 @@ function TicketDetail() {
                       In-Progress
                     </Radio>
                     <Radio value="solved" color="success">
-                      Solved
+                      Resolved
                     </Radio>
-                    <Radio value="on-hold" color="warning">
-                      On-Hold
+                    <Radio value="escalated" color="warning">
+                      Escalated
                     </Radio>
                   </RadioGroup>
                 </div>
@@ -192,6 +218,7 @@ function TicketDetail() {
           </Card>
         </div>
 
+        {/* --- RIGHT COLUMN: TICKET DETAILS --- */}
         <div className="lg:col-span-1">
           <Card className="border border-default-200 shadow-sm sticky top-6">
             <CardBody className="p-6">
@@ -212,7 +239,7 @@ function TicketDetail() {
                 <div className="flex justify-between items-center">
                   <span className="text-small text-default-600">Ticket ID</span>
                   <span className="text-small font-medium text-default-900">
-                    #{ticketData.id.replace("#", "")}
+                    {ticketData.id}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -221,6 +248,25 @@ function TicketDetail() {
                     {ticketData.details.category}
                   </span>
                 </div>
+
+                {/* --- UPDATED FIELDS FOR SHARED-EV --- */}
+                <div className="flex justify-between items-center">
+                  <span className="text-small text-default-600">Vehicle</span>
+                  <span className="text-small font-medium text-default-900 text-right">
+                    {ticketData.details.vehicle}
+                  </span>
+                </div>
+                {/* ✅ Booking ID replaces Trip ID */}
+                <div className="flex justify-between items-center">
+                  <span className="text-small text-default-600">
+                    Booking ID
+                  </span>
+                  <span className="text-small font-medium text-primary cursor-pointer hover:underline">
+                    {ticketData.details.bookingId}
+                  </span>
+                </div>
+                {/* ------------------------------- */}
+
                 <div className="flex justify-between items-center">
                   <span className="text-small text-default-600">Created</span>
                   <span className="text-small font-medium text-default-900">
