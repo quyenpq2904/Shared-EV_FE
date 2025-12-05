@@ -2,7 +2,6 @@
 
 import React, { useMemo } from "react";
 import {
-  Input,
   Button,
   DropdownTrigger,
   Dropdown,
