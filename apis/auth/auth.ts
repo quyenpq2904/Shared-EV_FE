@@ -6,11 +6,11 @@ const BaseURL = "auth";
 
 const authApi = {
   login(data: ILoginRequest) {
-    return http.post<ILoginResponse>(`v1/${BaseURL}/login`, data);
+    return http.post<ILoginResponse>(`${BaseURL}/login`, data);
   },
 
   refreshToken(data: IRefreshTokenRequest) {
-    return http.post<IRefreshTokenResponse>(`v1/${BaseURL}/refresh`, data);
+    return http.post<IRefreshTokenResponse>(`${BaseURL}/refresh`, data);
   },
 };
 

@@ -5,7 +5,7 @@ const BaseURL = "users";
 
 const usersApi = {
   getMe() {
-    return http.get<IGetMe>(`v1/${BaseURL}/me`);
+    return http.get<IGetMe>(`${BaseURL}/me`);
   },
 };
 
