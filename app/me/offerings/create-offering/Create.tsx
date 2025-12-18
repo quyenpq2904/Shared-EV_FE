@@ -83,10 +83,10 @@ export const Create = () => {
         <div>
           <div className="flex justify-between mb-2">
             <span className="text-sm font-medium text-black">
-              Total Ownership to Sell (%)
+              Total Ownership to Sell
             </span>
             <span className="text-lg font-bold text-success-500">
-              {packageData.ownershipPercent}%
+              {packageData.ownershipPercent}
             </span>
           </div>
           <Slider
@@ -109,7 +109,7 @@ export const Create = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <Input
-            label="Price per 1% Share"
+            label="Price per Share"
             placeholder="0.00"
             labelPlacement="outside"
             startContent={<span>$</span>}
@@ -122,10 +122,9 @@ export const Create = () => {
             isRequired
           />
           <Input
-            label="Min Purchase (%)"
+            label="Min Share to Purchase"
             placeholder="5"
             labelPlacement="outside"
-            endContent={<span>%</span>}
             type="number"
             classNames={inputStyles}
             value={packageData.minPurchasePercent.toString()}
@@ -136,13 +135,45 @@ export const Create = () => {
           />
         </div>
 
-        <Textarea
+        {/* Sales Period */}
+        <div>
+          <label className="text-sm font-medium text-black mb-2 block">
+            Sales Period
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Input
+              label="Start Date"
+              placeholder="mm/dd/yyyy"
+              labelPlacement="outside"
+              type="date"
+              classNames={inputStyles}
+              value={packageData.startDate}
+              onValueChange={(v) => updatePackageData({ startDate: v })}
+            />
+            <Input
+              label="End Date"
+              placeholder="mm/dd/yyyy"
+              labelPlacement="outside"
+              type="date"
+              classNames={inputStyles}
+              value={packageData.endDate}
+              onValueChange={(v) => updatePackageData({ endDate: v })}
+            />
+          </div>
+          <p className="text-tiny text-default-500 mt-2">
+            This period applies to the offering availability, not the vehicle
+            usage duration. Unsold shares will be automatically cancelled after
+            the end date.
+          </p>
+        </div>
+
+        {/* <Textarea
           label="Terms & Conditions"
           placeholder="Enter specific terms for this offering..."
           labelPlacement="outside"
           classNames={inputStyles}
           minRows={3}
-        />
+        /> */}
 
         <div className="flex justify-end pt-4">
           <Button

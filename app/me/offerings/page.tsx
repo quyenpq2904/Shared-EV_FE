@@ -1,270 +1,305 @@
 "use client";
 
-import DataTable, { Column } from "@/components/DataTable";
-import { formatCurrency } from "@/lib/utils/currency";
+import AppBreadcrumb from "@/components/AppBreadcrumb";
 import { IOffering } from "@/types/Offering";
-import { Button, Chip, Image, Input, Tab, Tabs, Tooltip } from "@heroui/react";
+import {
+  Button,
+  Card,
+  CardBody,
+  Chip,
+  Image,
+  Pagination,
+  useDisclosure,
+} from "@heroui/react";
 import { Icon } from "@iconify/react";
-import { useCallback, useState } from "react";
+import Link from "next/link";
+import { useMemo, useState } from "react";
+import CreateOfferingModal from "./CreateOfferingModal";
 
-export const mockOfferings: IOffering[] = [
-  {
-    id: "1",
-    year: 2023,
-    make: "Tesla",
-    model: "Model Y",
-    description: "Weekend & Holiday Share",
-    image:
-      "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=1000&auto=format&fit=crop",
-    location: "Los Angeles, CA",
-    range: 330,
-    seats: 5,
-    color: "White",
-    sharePercentage: 10,
-    sharesSold: 10,
-    totalShares: 20,
-    pricePerShare: 5000,
-    totalValue: 100000,
-    status: "active",
-    isLiked: true,
-  },
-  {
-    id: "2",
-    year: 2022,
-    make: "Audi",
-    model: "e-tron GT",
-    description: "Weekday Commuter Share",
-    image:
+interface IRequestOffering extends Omit<IOffering, "status"> {
+  dateSubmitted: string;
+  requestId: string;
+  licensePlate: string;
+  status: "pending" | "approved" | "rejected";
+  rejectionReason?: string;
+  category: string;
+}
+
+const mockOfferings: IRequestOffering[] = Array.from({ length: 6 }).map(
+  (_, index) => {
+    const brands = [
+      "Mercedes-Benz",
+      "BMW",
+      "Mazda",
+      "Tesla",
+      "Porsche",
+      "Ford",
+    ];
+    const models = [
+      "C300 AMG 2023",
+      "320i Sport Line 2022",
+      "CX-5 Premium 2023",
+      "Model Y Long Range",
+      "Taycan 4S",
+      "Mustang Mach-E",
+    ];
+    const categories = ["SEDAN", "SEDAN", "SUV", "SUV", "SEDAN", "SUV"];
+    const images = [
       "https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=1000&auto=format&fit=crop",
-    location: "New York, NY",
-    range: 238,
-    seats: 5,
-    color: "Gray",
-    sharePercentage: 20,
-    sharesSold: 5,
-    totalShares: 15,
-    pricePerShare: 8500,
-    totalValue: 127500,
-    status: "pending",
-    isLiked: false,
-  },
-  {
-    id: "3",
-    year: 2023,
-    make: "Ford",
-    model: "Mustang Mach-E",
-    description: "Full Access Share",
-    image:
-      "https://images.unsplash.com/photo-1696599622732-d304443939d2?q=80&w=1000&auto=format&fit=crop",
-    location: "Miami, FL",
-    range: 312,
-    seats: 5,
-    color: "Red",
-    sharePercentage: 25,
-    sharesSold: 25,
-    totalShares: 25,
-    pricePerShare: 2200,
-    totalValue: 55000,
-    status: "sold",
-    isLiked: true,
-  },
-  {
-    id: "4",
-    year: 2021,
-    make: "Porsche",
-    model: "Taycan",
-    description: "Executive Travel Share",
-    image:
+      "https://images.unsplash.com/photo-1555215695-3004980adade?q=80&w=1000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1580273916550-e323be2ebcc5?q=80&w=1000&auto=format&fit=crop",
+      "https://images.unsplash.com/photo-1560958089-b8a1929cea89?q=80&w=1000&auto=format&fit=crop",
       "https://images.unsplash.com/photo-1614207212035-c5432d677688?q=80&w=1000&auto=format&fit=crop",
-    location: "San Francisco, CA",
-    range: 227,
-    seats: 4,
-    color: "Silver",
-    sharePercentage: 10,
-    sharesSold: 0,
-    totalShares: 10,
-    pricePerShare: 15000,
-    totalValue: 150000,
-    status: "draft",
-    isLiked: false,
-  },
-];
+      "https://images.unsplash.com/photo-1696599622732-d304443939d2?q=80&w=1000&auto=format&fit=crop",
+    ];
+    const statuses: ("pending" | "approved" | "rejected")[] = [
+      "pending",
+      "approved",
+      "rejected",
+      "pending",
+      "approved",
+      "rejected",
+    ];
 
-const columns: Column[] = [
-  { name: "EV MODEL", uid: "model" },
-  { name: "SHARES", uid: "shares" },
-  { name: "PRICE / SHARE", uid: "price" },
-  { name: "TOTAL VALUE", uid: "total" },
-  { name: "STATUS", uid: "status", sortable: true },
-  { name: "ACTIONS", uid: "actions", align: "center" },
-];
+    const i = index % 6;
 
-const statusColorMap: Record<
-  string,
-  "success" | "warning" | "primary" | "default"
-> = {
-  active: "success",
-  pending: "warning",
-  sold: "primary",
-  draft: "default",
+    return {
+      id: `${index}`,
+      year: 2023,
+      make: brands[i].split(" ")[0],
+      model: models[i],
+      location: "San Francisco, CA",
+      image: images[i],
+      range: 300,
+      seats: 5,
+      color: "White",
+      sharePercentage: 10,
+      pricePerShare: 25000,
+      sharesSold: 5,
+      totalShares: 10,
+      totalValue: 250000,
+      status: statuses[i],
+      isLiked: false,
+      dateSubmitted: "24/05/2024",
+      requestId: `REQ-2023-00${index + 1}`,
+      licensePlate: `30K-123.4${index}`,
+      category: categories[i],
+      rejectionReason:
+        statuses[i] === "rejected"
+          ? "Financial profile does not meet requirements"
+          : undefined,
+    };
+  }
+);
+
+const OfferingCard = ({ item }: { item: IRequestOffering }) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "warning";
+      case "approved":
+        return "success";
+      case "rejected":
+        return "danger";
+      default:
+        return "default";
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case "pending":
+        return "PENDING APPROVAL";
+      case "approved":
+        return "APPROVED";
+      case "rejected":
+        return "REJECTED";
+      default:
+        return status.toUpperCase();
+    }
+  };
+
+  return (
+    <Card className="w-full hover:shadow-md transition-all border border-default-100">
+      <CardBody className="p-0">
+        <div className="flex flex-col md:flex-row gap-4 p-3">
+          {/* Image Section */}
+          <div className="relative w-full md:w-[240px] aspect-video rounded-lg overflow-hidden shrink-0 bg-default-100">
+            <div className="absolute top-2 left-2 z-10">
+              <Chip
+                radius="sm"
+                size="sm"
+                classNames={{
+                  base: "bg-[#454555] text-white font-medium px-1 h-5 min-h-0",
+                  content: "font-semibold text-[10px] px-1",
+                }}
+              >
+                {item.category}
+              </Chip>
+            </div>
+            <Image
+              removeWrapper
+              alt={item.model}
+              className="w-full h-full object-cover"
+              src={item.image}
+            />
+          </div>
+
+          {/* Content Section */}
+          <div className="flex-1 flex flex-col justify-between">
+            <div className="space-y-2">
+              <div className="flex items-center gap-3">
+                <Chip
+                  color={getStatusColor(item.status)}
+                  variant="flat"
+                  size="sm"
+                  startContent={
+                    <div
+                      className={`w-1.5 h-1.5 rounded-full ml-1 ${
+                        item.status === "pending"
+                          ? "bg-warning-500"
+                          : item.status === "approved"
+                          ? "bg-success-500"
+                          : "bg-danger-500"
+                      }`}
+                    />
+                  }
+                  classNames={{
+                    content:
+                      "font-bold pl-1 text-[10px] uppercase tracking-wide",
+                    base: "border-small border-opacity-20 h-6 min-h-0",
+                  }}
+                >
+                  {getStatusLabel(item.status)}
+                </Chip>
+                <div className="w-1 h-1 rounded-full bg-default-300" />
+                <span className="text-tiny text-default-500 font-medium">
+                  Purchase Request
+                </span>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold text-foreground line-clamp-1">
+                  {item.make} {item.model}
+                </h3>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-4 text-tiny text-default-500">
+                <div className="flex items-center gap-1.5">
+                  <Icon icon="solar:calendar-linear" className="text-base" />
+                  <span>Submitted: {item.dateSubmitted}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <Icon
+                    icon="solar:document-text-linear"
+                    className="text-base"
+                  />
+                  <span className="font-mono bg-default-100 px-1.5 py-0.5 rounded text-[10px]">
+                    #{item.requestId}
+                  </span>
+                </div>
+              </div>
+
+              <div className="pt-1">
+                <p className="text-tiny text-default-500 font-medium">
+                  License Plate:{" "}
+                  <span className="text-foreground font-semibold">
+                    {item.licensePlate}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Button */}
+          <div className="flex items-center md:items-center justify-start md:justify-end">
+            <Button
+              as={Link}
+              href={`/offerings/${item.id}`}
+              color={item.status === "rejected" ? "default" : "primary"}
+              variant={"solid"}
+              className={`font-semibold min-w-[140px] shadow-sm ${
+                item.status === "rejected" ? "" : "bg-[#6C5DD3]"
+              }`}
+            >
+              {item.status === "rejected" ? "View Details" : "View Details"}
+              {item.status !== "rejected" && (
+                <Icon icon="solar:arrow-right-linear" className="text-xl" />
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Footer for Rejected Status */}
+        {item.status === "rejected" && (
+          <div className="border-t border-dashed border-default-200 px-5 py-3 bg-danger-50 flex items-start gap-2">
+            <Icon
+              icon="solar:info-circle-bold"
+              className="text-danger text-lg mt-0.5 shrink-0"
+            />
+            <p className="text-small text-danger font-medium">
+              Reason: {item.rejectionReason}
+            </p>
+          </div>
+        )}
+      </CardBody>
+    </Card>
+  );
 };
 
 function OfferingsPage() {
-  const [filterValue, setFilterValue] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string | number>("all");
   const [page, setPage] = useState(1);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
+  const rowsPerPage = 5;
+  const pages = Math.ceil(mockOfferings.length / rowsPerPage);
 
-  // const { data, isLoading } = useQuery({
-  //   queryKey: ["offerings", page],
-  //   queryFn: () => fetchOfferings({ page, limit: 10 }),
-  // });
-
-  const renderCell = useCallback((item: any, columnKey: React.Key) => {
-    const cellValue = item[columnKey as keyof typeof item];
-
-    switch (columnKey) {
-      case "model":
-        return (
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-10 relative rounded-lg overflow-hidden bg-default-100 shrink-0">
-              <Image
-                removeWrapper
-                alt={item.model}
-                className="w-full h-full object-cover"
-                src={item.image}
-              />
-            </div>
-            <div className="flex flex-col">
-              <p className="text-small font-bold text-default-900">
-                {item.model}
-              </p>
-              <p className="text-tiny text-default-600">{item.description}</p>
-            </div>
-          </div>
-        );
-      case "shares":
-        return (
-          <div className="text-small text-default-700">
-            {item.sharesSold} / {item.totalShares}
-          </div>
-        );
-      case "price":
-        return (
-          <div className="text-small text-default-700 font-medium">
-            {formatCurrency(item.pricePerShare)}
-          </div>
-        );
-      case "total":
-        return (
-          <div className="text-small font-bold text-default-900">
-            {formatCurrency(item.totalValue)}
-          </div>
-        );
-      case "status":
-        return (
-          <Chip
-            className="capitalize border-none gap-1 text-default-600"
-            color={statusColorMap[item.status]}
-            size="sm"
-            variant="flat"
-          >
-            {cellValue}
-          </Chip>
-        );
-      case "actions":
-        return (
-          <div className="relative flex justify-center items-center gap-2">
-            <Tooltip content="View Details">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <Icon icon="solar:eye-linear" />
-              </span>
-            </Tooltip>
-            <Tooltip content="Edit">
-              <span className="text-lg text-default-400 cursor-pointer active:opacity-50">
-                <Icon icon="solar:pen-new-square-linear" />
-              </span>
-            </Tooltip>
-            <Tooltip color="danger" content="Delete">
-              <span className="text-lg text-danger cursor-pointer active:opacity-50">
-                <Icon icon="solar:trash-bin-trash-linear" />
-              </span>
-            </Tooltip>
-          </div>
-        );
-      default:
-        return cellValue;
-    }
-  }, []);
+  const items = useMemo(() => {
+    const start = (page - 1) * rowsPerPage;
+    const end = start + rowsPerPage;
+    return mockOfferings.slice(start, end);
+  }, [page]);
 
   return (
-    <div className="space-y-8">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-centergap-4">
+    <div className="space-y-6">
+      <div className="flex justify-between items-end">
         <div className="space-y-1">
           <h1 className="text-3xl font-bold text-default-900">
             My EV Share Offerings
           </h1>
           <p className="text-default-600">
-            Manage, edit, and track the status of all your vehicle share
-            listings.
+            Track the status of your purchase requests and vehicle shares.
           </p>
         </div>
+        <Button
+          color="primary"
+          startContent={<Icon icon="solar:add-circle-bold" />}
+          onPress={onOpen}
+        >
+          Create Offering
+        </Button>
       </div>
-      <div>
-        <div className="flex flex-col gap-4 mb-6">
-          <div className="flex flex-col sm:flex-row justify-between items-end gap-4">
-            <Tabs
-              aria-label="Status Filter"
-              selectedKey={statusFilter}
-              onSelectionChange={setStatusFilter}
-            >
-              <Tab key="all" title="All Offerings" />
-              <Tab key="active" title="Active" />
-              <Tab key="pending" title="Pending" />
-              <Tab key="sold" title="Sold Out" />
-              <Tab key="draft" title="Draft" />
-            </Tabs>
 
-            <div className="flex gap-4">
-              <Input
-                isClearable
-                className="w-full sm:max-w-[300px]"
-                placeholder="Search offerings..."
-                startContent={
-                  <Icon
-                    icon="solar:magnifer-linear"
-                    className="text-default-400"
-                  />
-                }
-                value={filterValue}
-                onClear={() => setFilterValue("")}
-                onValueChange={setFilterValue}
-                variant="bordered"
-                classNames={{ inputWrapper: "border-default-300" }}
-              />
-              <Button
-                className="min-w-28"
-                startContent={
-                  <Icon icon="solar:add-circle-bold" className="text-xl" />
-                }
-                variant="flat"
-                color="success"
-              >
-                Create
-              </Button>
-            </div>
+      <div className="space-y-6 mt-8">
+        {items.map((item) => (
+          <OfferingCard key={item.id} item={item} />
+        ))}
+
+        {pages > 1 && (
+          <div className="flex justify-center mt-8 pb-10">
+            <Pagination
+              isCompact
+              showControls
+              showShadow
+              color="primary"
+              page={page}
+              total={pages}
+              onChange={setPage}
+            />
           </div>
-        </div>
-        <DataTable<IOffering>
-          columns={columns}
-          data={mockOfferings}
-          renderCell={renderCell}
-          page={page}
-          totalPages={1}
-          totalItems={4}
-          onPageChange={(newPage) => setPage(newPage)}
-          // isLoading={isLoading}
-        />
+        )}
       </div>
+
+      <CreateOfferingModal isOpen={isOpen} onOpenChange={onOpenChange} />
     </div>
   );
 }

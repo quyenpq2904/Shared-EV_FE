@@ -81,7 +81,12 @@ const StatusBadge = ({ status }: { status: IVehicle["status"] }) => {
   );
 };
 
+import React, { useState } from "react";
+import AddVehicleModal from "./AddVehicleModal";
+
 function MyGaragePage() {
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
@@ -99,8 +104,7 @@ function MyGaragePage() {
             variant="bordered"
           />
           <Button
-            as={Link}
-            href="/me/garage/add-vehicle"
+            onPress={() => setIsAddModalOpen(true)}
             color="success"
             variant="flat"
             startContent={<Icon icon="solar:add-circle-bold" width={28} />}
@@ -110,6 +114,11 @@ function MyGaragePage() {
           </Button>
         </div>
       </div>
+
+      <AddVehicleModal
+        isOpen={isAddModalOpen}
+        onOpenChange={setIsAddModalOpen}
+      />
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {garageVehicles.map((vehicle) => (

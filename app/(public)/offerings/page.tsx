@@ -13,6 +13,7 @@ import {
   Image,
   Input,
   Pagination,
+  Progress,
   Select,
   SelectItem,
   Slider,
@@ -232,13 +233,27 @@ const OfferingCard = ({ item }: { item: IOffering }) => {
           </div>
         </div>
 
-        <div className="mt-1 flex items-baseline gap-2">
-          <span className="text-lg font-bold text-[#00E396]">
-            {item.sharePercentage}% Share
-          </span>
-          <span className="text-xl font-bold text-foreground">
-            {formatCurrency(item.pricePerShare)}
-          </span>
+        <div className="mt-1 flex flex-col gap-1">
+          <span className="text-small text-default-500">Price per share</span>
+          <div className="flex justify-between items-end">
+            <span className="text-2xl font-bold text-blue-700">
+              {formatCurrency(item.pricePerShare)}
+            </span>
+            <span className="text-small text-default-500 mb-1">
+              Sold {item.sharesSold}/{item.totalShares}
+            </span>
+          </div>
+          <Progress
+            aria-label="Shares sold"
+            value={item.sharesSold}
+            maxValue={item.totalShares}
+            size="sm"
+            classNames={{
+              indicator: "bg-blue-700",
+              track: "bg-default-100",
+            }}
+            radius="full"
+          />
         </div>
       </CardBody>
 

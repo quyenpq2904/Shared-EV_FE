@@ -1,14 +1,24 @@
 "use client";
 
-import { Image, Card, CardBody, Divider } from "@heroui/react";
+import {
+  Image,
+  Card,
+  CardBody,
+  Divider,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  Button,
+} from "@heroui/react";
 import {
   CreateOfferingProvider,
   useCreateOffering,
 } from "@/contexts/CreateOfferingContext";
 import RowSteps from "@/components/RowSteps";
-import { Create } from "./Create";
-import { Preview } from "./Preview";
-import { Result } from "./Result";
+import { Create } from "./create-offering/Create";
+import { Preview } from "./create-offering/Preview";
+import { Result } from "./create-offering/Result";
 
 const RightSummary = () => {
   const { selectedVehicle, totalValue, currentStep, packageData } =
@@ -71,7 +81,7 @@ const RightSummary = () => {
   );
 };
 
-const CreateOfferingFlow = () => {
+const CreateOfferingFlow = ({ onClose }: { onClose: () => void }) => {
   const { currentStep, setStep } = useCreateOffering();
 
   const renderStepContent = () => {
@@ -88,40 +98,62 @@ const CreateOfferingFlow = () => {
   };
 
   return (
-    <div className="">
-      <div className="max-w-6xl mx-auto space-y-8">
-        <div className="flex justify-center">
-          <RowSteps
-            currentStep={currentStep}
-            onStepChange={currentStep < 2 ? setStep : undefined}
-            color="success"
-            steps={[
-              { title: "Create Offering" },
-              { title: "Preview" },
-              { title: "Under Review" },
-            ]}
-          />
-        </div>
+    <div className="max-w-6xl mx-auto space-y-8 w-full">
+      <div className="flex justify-center">
+        <RowSteps
+          currentStep={currentStep}
+          onStepChange={currentStep < 2 ? setStep : undefined}
+          color="success"
+          steps={[
+            { title: "Create Offering" },
+            { title: "Preview" },
+            { title: "Under Review" },
+          ]}
+        />
+      </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div
-            className={currentStep === 2 ? "lg:col-span-12" : "lg:col-span-8"}
-          >
-            {renderStepContent()}
-          </div>
-          <div className="lg:col-span-4">
-            <RightSummary />
-          </div>
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className={currentStep === 2 ? "lg:col-span-12" : "lg:col-span-8"}>
+          {renderStepContent()}
+        </div>
+        <div className="lg:col-span-4">
+          <RightSummary />
         </div>
       </div>
     </div>
   );
 };
 
-export default function Page() {
+interface CreateOfferingModalProps {
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function CreateOfferingModal({
+  isOpen,
+  onOpenChange,
+}: CreateOfferingModalProps) {
   return (
-    <CreateOfferingProvider>
-      <CreateOfferingFlow />
-    </CreateOfferingProvider>
+    <Modal
+      isOpen={isOpen}
+      onOpenChange={onOpenChange}
+      size="5xl"
+      scrollBehavior="inside"
+    >
+      <ModalContent>
+        {(onClose) => (
+          <>
+            <ModalHeader className="flex flex-col gap-1">
+              Create New Offering
+            </ModalHeader>
+            <ModalBody className="pb-8">
+              <CreateOfferingProvider>
+                <CreateOfferingFlow onClose={onClose} />
+              </CreateOfferingProvider>
+            </ModalBody>
+          </>
+        )}
+      </ModalContent>
+    </Modal>
   );
 }

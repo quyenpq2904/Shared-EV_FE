@@ -43,6 +43,11 @@ const adminSidebarConfig: SidebarSection[] = [
         path: "",
       },
       {
+        icon: "ri:car-line",
+        name: "Vehicles",
+        path: "vehicles",
+      },
+      {
         icon: "carbon:operations-record",
         name: "Operations",
         subItems: [

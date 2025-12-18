@@ -46,6 +46,8 @@ export interface SharePackageData {
   pricePerPercent: number;
   minPurchasePercent: number;
   terms: string;
+  startDate: string;
+  endDate: string;
 }
 
 interface CreateOfferingContextType {
@@ -83,6 +85,8 @@ export function CreateOfferingProvider({ children }: { children: ReactNode }) {
     pricePerPercent: 1200,
     minPurchasePercent: 5,
     terms: "",
+    startDate: "",
+    endDate: "",
   });
 
   const totalValue = packageData.ownershipPercent * packageData.pricePerPercent;
